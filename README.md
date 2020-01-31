@@ -1,5 +1,9 @@
 # People Tracking w/ OpenCV
 
+This repository contains code used to identify the position of people within a camera viewfinder. Most of the code here has been taken from or inspired by PyImageSearch's code associated with the [OpenCV People Counter](https://www.pyimagesearch.com/2018/08/13/opencv-people-counter/) tutorial.
+
+Uniquely, this version of the project includes some alterations for communicating the list of people positions in the space using serialized JSON strings that are sent via OSC.
+
 ## Installation
 
 ### Installing Pip
