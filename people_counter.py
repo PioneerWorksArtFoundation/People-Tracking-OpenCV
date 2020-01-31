@@ -20,6 +20,25 @@ import imutils
 import time
 import dlib
 import cv2
+import json
+from oscpy.client import OSCClient
+
+OSC_PATH = "/people"
+osc = OSCClient("192.168.6.137", 6969, encoding="utf8")
+
+def sendObjectPositionsWithOSC(objects):
+	# Send Data with OSC
+	objectsList = list(objects.items())
+	listOfObjectPoints = []
+	for item in objectsList:
+		index = item[0]
+		np_position = item[1]
+		serializablePositionObj = {"position": np_position.tolist(), "index": index}
+		listOfObjectPoints.append(serializablePositionObj)
+	
+	objectsAsJSON = json.dumps(listOfObjectPoints)
+	print(objectsAsJSON)
+	osc.send_message(OSC_PATH, objectsAsJSON)
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
@@ -194,7 +213,8 @@ while True:
 	# use the centroid tracker to associate the (1) old object
 	# centroids with (2) the newly computed object centroids
 	objects = ct.update(rects)
-	print(objects)
+
+	sendObjectPositionsWithOSC(objects)
 
 	# loop over the tracked objects
 	for (objectID, centroid) in objects.items():
