@@ -23,23 +23,6 @@ import cv2
 import json
 from oscpy.client import OSCClient
 
-OSC_PATH = "/people"
-osc = OSCClient("192.168.6.137", 6969, encoding="utf8")
-
-def sendObjectPositionsWithOSC(objects):
-	# Send Data with OSC
-	objectsList = list(objects.items())
-	listOfObjectPoints = []
-	for item in objectsList:
-		index = item[0]
-		np_position = item[1]
-		serializablePositionObj = {"position": np_position.tolist(), "index": index}
-		listOfObjectPoints.append(serializablePositionObj)
-	
-	objectsAsJSON = json.dumps(listOfObjectPoints)
-	print(objectsAsJSON)
-	osc.send_message(OSC_PATH, objectsAsJSON)
-
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-p", "--prototxt", required=True,
@@ -54,7 +37,29 @@ ap.add_argument("-c", "--confidence", type=float, default=0.4,
 	help="minimum probability to filter weak detections")
 ap.add_argument("-s", "--skip-frames", type=int, default=30,
 	help="# of skip frames between detections")
+ap.add_argument("--port", type=int,
+	help="Port to send OSC messages to at the specified IP address")
+ap.add_argument("--addr", type=str,
+	help="OSC address (path for OSC messages)")
+ap.add_argument("--ip", type=str,
+	help="IP address to send OSC messages to")
 args = vars(ap.parse_args())
+
+osc = OSCClient(args["ip"], args["port"], encoding="utf8")
+
+def sendObjectPositionsWithOSC(objects):
+	# Send Data with OSC
+	objectsList = list(objects.items())
+	listOfObjectPoints = []
+	for item in objectsList:
+		index = item[0]
+		np_position = item[1]
+		serializablePositionObj = {"position": np_position.tolist(), "index": index}
+		listOfObjectPoints.append(serializablePositionObj)
+	
+	objectsAsJSON = json.dumps(listOfObjectPoints)
+	print(objectsAsJSON)
+	osc.send_message(args["addr"], objectsAsJSON)
 
 # initialize the list of class labels MobileNet SSD was trained to
 # detect
